@@ -92,11 +92,10 @@ export default function MenuExperience() {
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.04 * i, duration: 0.4 }}
-                    className="menu-item group rounded-lg px-4 py-3.5 transition-colors duration-300 hover:bg-gold/5"
-                    tabIndex={0}
+                    className="rounded-lg px-4 py-3.5 transition-colors duration-300 hover:bg-gold/5"
                   >
                     <div className="flex items-baseline">
-                      <span className="font-serif text-lg text-cream transition-colors group-hover:text-gold-light">
+                      <span className="font-serif text-lg text-cream">
                         {item.name}
                         {item.popular && (
                           <span
@@ -117,18 +116,14 @@ export default function MenuExperience() {
                         {formatPrice(item.price)}
                       </span>
                     </div>
-                    <div className="menu-detail">
-                      <div>
-                        <p className="pt-1.5 text-sm leading-relaxed text-cream-dim">
-                          {item.description}
-                          {item.vegetarian && (
-                            <span className="ml-2 text-teal-light">
-                              · vegetarisch
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    </div>
+                    <p className="mt-1.5 text-sm leading-relaxed text-cream-dim">
+                      {item.description}
+                      {item.vegetarian && (
+                        <span className="ml-2 text-teal-light">
+                          · vegetarisch
+                        </span>
+                      )}
+                    </p>
                   </motion.li>
                 ))}
               </ul>

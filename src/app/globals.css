@@ -107,11 +107,6 @@ body {
   to { background-position: 200% center; }
 }
 
-/* ---------- heat haze (SVG filter target) ---------- */
-.heat-haze {
-  filter: url(#heat-haze-filter);
-}
-
 /* ---------- scroll hint ---------- */
 @keyframes scroll-dot {
   0% { transform: translateY(0); opacity: 1; }
@@ -143,49 +138,6 @@ body {
 .marquee-track {
   animation: marquee 30s linear infinite;
   will-change: transform;
-}
-
-/* ---------- ember float (live kitchen) ---------- */
-@keyframes flicker {
-  0%, 100% { opacity: 0.85; transform: scaleY(1); }
-  30% { opacity: 1; transform: scaleY(1.06); }
-  60% { opacity: 0.75; transform: scaleY(0.96); }
-}
-
-.flame-flicker {
-  animation: flicker 0.9s ease-in-out infinite;
-  transform-origin: bottom;
-}
-
-/* ---------- hungry mode ---------- */
-html.hungry body {
-  --hungry-sat: 1.25;
-}
-
-html.hungry img[data-food] {
-  filter: saturate(1.3) contrast(1.06) brightness(1.04);
-  transition: filter 0.8s ease;
-}
-
-html.hungry .hungry-warm::after {
-  opacity: 1;
-}
-
-.hungry-warm::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 80;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-  background:
-    radial-gradient(ellipse at 50% 110%, rgba(196, 87, 47, 0.18), transparent 55%),
-    radial-gradient(ellipse at 50% -10%, rgba(201, 169, 97, 0.1), transparent 50%);
-}
-
-img[data-food] {
-  transition: filter 0.8s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ---------- card 3d ---------- */
@@ -259,22 +211,6 @@ img[data-food] {
 .divider-gold {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(201, 169, 97, 0.5), transparent);
-}
-
-/* ---------- menu item hover reveal ---------- */
-.menu-item .menu-detail {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.menu-item:hover .menu-detail,
-.menu-item:focus-within .menu-detail {
-  grid-template-rows: 1fr;
-}
-
-.menu-item .menu-detail > div {
-  overflow: hidden;
 }
 
 /* dotted price leader */

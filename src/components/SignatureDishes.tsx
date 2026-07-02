@@ -40,26 +40,6 @@ export default function SignatureDishes() {
       id="signature"
       className="relative mx-auto max-w-7xl px-6 py-28 md:px-8 md:py-40"
     >
-      {/* SVG heat-haze filter definition */}
-      <svg width="0" height="0" className="absolute" aria-hidden>
-        <filter id="heat-haze-filter">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.008 0.03"
-            numOctaves="1"
-            result="noise"
-          >
-            <animate
-              attributeName="baseFrequency"
-              values="0.008 0.03;0.012 0.05;0.008 0.03"
-              dur="6s"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" />
-        </filter>
-      </svg>
-
       <Reveal className="text-center">
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-gold">
           Le Nostre Firme
