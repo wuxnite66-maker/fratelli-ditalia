@@ -6,10 +6,16 @@ import { HOURS, SITE } from "@/data/site";
 import Reveal from "./Reveal";
 
 /**
- * Reservierung ohne Backend — ehrlich & konvertierend:
- * Formular validiert gegen die echten Öffnungszeiten und erzeugt eine
- * fertige Anfrage; bestätigt wird telefonisch (ein Tap). Kein Fake-Booking.
+ * Reservierung ohne eigenes Backend:
+ * Formular validiert gegen die echten Öffnungszeiten und schickt die
+ * Anfrage per FormSubmit als E-Mail ans Restaurant-Postfach. Schlägt der
+ * Versand fehl, bleibt der telefonische Weg als Fallback (ein Tap).
  */
+
+// FormSubmit-Postfach: Anfragen landen hier als E-Mail.
+// Beim allerersten Versand schickt FormSubmit eine Aktivierungsmail an
+// diese Adresse — einmal bestätigen, danach läuft alles automatisch.
+const RESERVATION_INBOX = "wuxnite66@gmail.com";
 
 const toMin = (s: string) => {
   const [h, m] = s.split(":").map(Number);
@@ -44,11 +50,19 @@ export default function ReservationSection() {
   const [time, setTime] = useState("");
   const [guests, setGuests] = useState("2");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
 
   const slots = useMemo(() => slotsForDate(date), [date]);
   const closedDay = date !== "" && slots.length === 0;
-  const valid = date && time && name.trim().length >= 2 && !closedDay;
+  const valid =
+    date &&
+    time &&
+    name.trim().length >= 2 &&
+    phone.trim().length >= 6 &&
+    !closedDay;
 
   const dateNice = date
     ? new Date(date + "T12:00:00").toLocaleDateString("de-AT", {
@@ -57,6 +71,38 @@ export default function ReservationSection() {
         month: "long",
       })
     : "";
+
+  const submit = async () => {
+    setSending(true);
+    try {
+      const res = await fetch(
+        `https://formsubmit.co/ajax/${RESERVATION_INBOX}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            _subject: `🍕 Reservierung: ${dateNice}, ${time} Uhr — ${name.trim()}`,
+            _template: "table",
+            _captcha: "false",
+            Name: name.trim(),
+            Telefon: phone.trim(),
+            Datum: dateNice,
+            Uhrzeit: `${time} Uhr`,
+            Personen: guests === "9+" ? "Gruppe (mehr als 8)" : guests,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSendError(false);
+    } catch {
+      setSendError(true);
+    }
+    setSending(false);
+    setDone(true);
+  };
 
   return (
     <section
@@ -92,7 +138,7 @@ export default function ReservationSection() {
                   exit={{ opacity: 0, y: -16 }}
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (valid) setDone(true);
+                    if (valid && !sending) submit();
                   }}
                   className="grid gap-5 md:grid-cols-2"
                 >
@@ -191,16 +237,37 @@ export default function ReservationSection() {
                     />
                   </div>
 
+                  <div>
+                    <label
+                      htmlFor="res-phone"
+                      className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gold-light"
+                    >
+                      Telefon *
+                    </label>
+                    <input
+                      id="res-phone"
+                      type="tel"
+                      required
+                      minLength={6}
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Für die Bestätigung"
+                      className="min-h-12 w-full rounded-lg border border-gold/25 bg-ink px-4 text-cream placeholder:text-cream-dim/40 focus:border-gold/70 focus:outline-none"
+                    />
+                  </div>
+
                   <div className="md:col-span-2">
                     <button
                       type="submit"
-                      disabled={!valid}
+                      disabled={!valid || sending}
                       className="btn-gold w-full rounded-full px-8 py-4 text-sm font-bold uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Reservierung anfragen
+                      {sending ? "Wird gesendet …" : "Reservierung anfragen"}
                     </button>
                     <p className="mt-3 text-center text-xs text-cream-dim/60">
-                      Ihr Tisch ist nach kurzer telefonischer Bestätigung fix.
+                      Wir rufen Sie kurz zur Bestätigung an — dann ist Ihr
+                      Tisch fix.
                     </p>
                   </div>
                 </motion.form>
@@ -222,18 +289,40 @@ export default function ReservationSection() {
                     </p>
                     <p className="text-cream-dim">
                       {guests === "9+" ? "Gruppe (9+)" : `${guests} ${guests === "1" ? "Person" : "Personen"}`}
+                      {" · "}☎ {phone.trim()}
                     </p>
                   </div>
-                  <p className="mx-auto mt-6 max-w-sm text-cream-dim">
-                    Nur noch <strong className="text-cream">ein Anruf</strong>{" "}
-                    (30 Sekunden) und der Chef hält Ihren Tisch frei:
-                  </p>
-                  <a
-                    href={`tel:${SITE.phoneIntl}`}
-                    className="btn-gold mt-5 inline-block rounded-full px-10 py-4 text-base font-bold tracking-widest"
-                  >
-                    ☎ {SITE.phone} — jetzt bestätigen
-                  </a>
+                  {!sendError ? (
+                    <>
+                      <p className="mx-auto mt-6 max-w-sm text-cream-dim">
+                        Ihre Anfrage ist{" "}
+                        <strong className="text-cream">angekommen</strong> —
+                        wir rufen Sie kurz zur Bestätigung an. Sie wollen
+                        sofort Gewissheit?
+                      </p>
+                      <a
+                        href={`tel:${SITE.phoneIntl}`}
+                        className="btn-ghost mt-5 inline-block rounded-full px-10 py-4 text-base font-semibold tracking-widest"
+                      >
+                        ☎ {SITE.phone}
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mx-auto mt-6 max-w-sm text-cream-dim" role="alert">
+                        Die Online-Übertragung hat leider{" "}
+                        <strong className="text-cream">nicht geklappt</strong>.
+                        Ein Anruf (30 Sekunden) und der Chef hält Ihren Tisch
+                        frei:
+                      </p>
+                      <a
+                        href={`tel:${SITE.phoneIntl}`}
+                        className="btn-gold mt-5 inline-block rounded-full px-10 py-4 text-base font-bold tracking-widest"
+                      >
+                        ☎ {SITE.phone} — jetzt reservieren
+                      </a>
+                    </>
+                  )}
                   <div className="mt-6">
                     <button
                       onClick={() => setDone(false)}

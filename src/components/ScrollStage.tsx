@@ -18,6 +18,7 @@ export default function ScrollStage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textARef = useRef<HTMLDivElement>(null);
   const textBRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const status = useOpenStatus();
   const [reduced, setReduced] = useState(false);
 
@@ -185,6 +186,13 @@ export default function ScrollStage() {
         const b = Math.max(0, Math.min(1, (smooth - 0.55) * 3.2));
         textARef.current.style.opacity = String(a);
         textARef.current.style.transform = `translateY(${smooth * -70}px)`;
+        // Parallax: Headline driftet etwas schneller als der restliche
+        // Textblock nach oben — subtiler Tiefeneffekt beim Scrollen.
+        if (headlineRef.current) {
+          headlineRef.current.style.transform = `translateY(${
+            smooth * -48
+          }px)`;
+        }
         textARef.current.style.pointerEvents = a > 0.3 ? "auto" : "none";
         textBRef.current.style.opacity = String(b);
         textBRef.current.style.transform = `translateY(${(1 - b) * 40}px)`;
@@ -209,11 +217,11 @@ export default function ScrollStage() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="top" className="relative h-[300vh]">
+    <section ref={sectionRef} id="top" className="relative h-[435vh]">
       {/* sticky stage */}
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         {/* clean gradient background */}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,#0b0a08_0%,#1c1409_35%,#2a1a0c_60%,#0b0a08_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#050506_0%,#0d0d12_40%,#12101a_65%,#050506_100%)]" />
 
         {reduced ? (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -238,7 +246,7 @@ export default function ScrollStage() {
         {/* ---- text state A: intro + conversion CTAs ---- */}
         <div
           ref={textARef}
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center"
+          className="absolute inset-0 z-10 flex flex-col items-start justify-center px-6 text-left md:px-16 lg:px-24"
         >
           {status && (
             <span
@@ -262,17 +270,20 @@ export default function ScrollStage() {
             ★ 4,8 bei Google · 512 Bewertungen
           </p>
 
-          <h1 className="max-w-4xl font-serif text-4xl leading-[1.08] text-cream md:text-6xl lg:text-7xl">
+          <h1
+            ref={headlineRef}
+            className="max-w-4xl font-serif text-4xl leading-[1.08] text-cream will-change-transform md:text-6xl lg:text-7xl"
+          >
             Echte italienische Pizza —{" "}
             <em className="gold-text">frisch aus dem Ofen.</em>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-xl text-base text-cream-dim md:text-lg">
+          <p className="mt-6 max-w-xl text-base text-cream-dim md:text-lg">
             Dünner, knuspriger Teig, großzügig belegt — vom Chef persönlich
             zubereitet. Vor Ort genießen oder mitnehmen.
           </p>
 
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-9 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
             <a
               href="#reservieren"
               className="btn-gold rounded-full px-8 py-4 text-sm font-bold uppercase tracking-widest"
