@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     const result = await resend.emails.send({
       from: "Fratelli d'Italia <onboarding@resend.dev>",
-      to: process.env.RESERVATION_EMAIL || "wuxnite66@gmail.com",
+      to: process.env.RESERVATION_EMAIL || "jinmarco17@gmail.com",
       subject: `🍕 Reservierung: ${dateNice}, ${time} Uhr — ${name}`,
       html: `
         <h2>Neue Reservierungsanfrage</h2>
