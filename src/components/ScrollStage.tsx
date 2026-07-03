@@ -43,53 +43,28 @@ export default function ScrollStage() {
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
     camera.position.z = 1.6;
 
-    // ---- media plane (video if available, else still image) ----
-    // Seitenverhältnis des Mediums; wird nach dem Laden aktualisiert,
-    // damit auch quadratische Videos unverzerrt cover-gefittet werden.
+    // ---- cinematic still (kein Video mehr) ----
+    // Ein hochwertiges Foto mit langsamer Kamerafahrt beim Scrollen —
+    // ruhig, elegant, wie in einem Fine-Dining-Intro.
+    // Seitenverhältnis wird nach dem Laden übernommen (Cover-Fit).
     let mediaAspect = 1.5;
 
     const loader = new THREE.TextureLoader();
-    let texture: THREE.Texture = loader.load(
-      "/images/hero-pizza.jpg",
+    const texture: THREE.Texture = loader.load(
+      "/images/pizza-burrata.jpg",
       (t) => {
+        t.anisotropy = renderer.capabilities.getMaxAnisotropy();
         mediaAspect = t.image.width / t.image.height;
         resize();
       }
     );
     texture.colorSpace = THREE.SRGBColorSpace;
 
-    let video: HTMLVideoElement | null = null;
-    let videoDuration = 0;
-
-    fetch("/videos/hero.mp4", { method: "HEAD" })
-      .then((r) => {
-        const type = r.headers.get("content-type") ?? "";
-        if (!r.ok || !type.startsWith("video")) return;
-        video = document.createElement("video");
-        video.src = "/videos/hero.mp4";
-        video.muted = true;
-        video.playsInline = true;
-        video.preload = "auto";
-        video.addEventListener("loadedmetadata", () => {
-          if (!video) return;
-          videoDuration = video.duration;
-          mediaAspect = video.videoWidth / video.videoHeight;
-          const vt = new THREE.VideoTexture(video);
-          vt.colorSpace = THREE.SRGBColorSpace;
-          material.map = vt;
-          material.needsUpdate = true;
-          texture = vt;
-          resize();
-        });
-        video.load();
-      })
-      .catch(() => {});
-
-    // leicht abgedunkelt, damit Headline & CTAs auch auf hellem
-    // Videomaterial lesbar bleiben (multipliziert die Textur)
+    // warm abgedunkelt, damit Headline & CTAs überall lesbar bleiben
+    // (multipliziert die Textur → dunkler, satter, edler)
     const material = new THREE.MeshBasicMaterial({
       map: texture,
-      color: 0x9a9a9a,
+      color: 0x8a8074,
     });
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
     scene.add(plane);
@@ -118,9 +93,16 @@ export default function ScrollStage() {
     scene.add(points);
 
     // ---- sizing ----
+    // liest die tatsächliche Anzeigegröße des Canvas (robust gegen
+    // Timing beim Mount — window.innerHeight kann kurz 0 sein).
+    let lastW = 0;
+    let lastH = 0;
     const resize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = canvas.clientWidth || window.innerWidth;
+      const h = canvas.clientHeight || window.innerHeight;
+      if (w === lastW && h === lastH) return;
+      lastW = w;
+      lastH = h;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -150,30 +132,26 @@ export default function ScrollStage() {
     // ---- render loop ----
     const clock = new THREE.Clock();
     let raf = 0;
-    let lastSeek = -1;
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
+      // Anzeigegröße jederzeit nachführen (fängt verspätetes Layout ab)
+      resize();
       const t = clock.getElapsedTime();
       // inertia — butter-smooth follow
       smooth += (progress - smooth) * 0.08;
 
-      // camera dolly-in + slight drift
-      camera.position.z = 1.6 - smooth * 0.55;
-      camera.position.x = Math.sin(smooth * Math.PI) * 0.06;
-      camera.rotation.z = smooth * -0.03;
+      // langsame, elegante Kamerafahrt beim Scrollen (Dolly-in) +
+      // permanentes, kaum merkliches Atmen für lebendige Ruhe
+      const breathe = Math.sin(t * 0.18) * 0.012;
+      camera.position.z = 1.62 - smooth * 0.42 + breathe;
+      camera.position.x = Math.sin(smooth * Math.PI) * 0.05;
+      camera.position.y = Math.cos(t * 0.14) * 0.008;
+      camera.rotation.z = smooth * -0.025;
 
-      // video scrub: forward on scroll down, backward on scroll up
-      if (video && videoDuration > 0) {
-        const target = smooth * Math.max(0, videoDuration - 0.05);
-        if (Math.abs(target - lastSeek) > 1 / 30) {
-          video.currentTime = target;
-          lastSeek = target;
-        }
-      } else {
-        // still image: subtle living motion
-        plane.position.y = Math.sin(t * 0.3) * 0.01 - smooth * 0.12;
-      }
+      // sanfte, langsame Ken-Burns-Drift auf dem Standbild
+      plane.position.y = Math.sin(t * 0.22) * 0.012 - smooth * 0.1;
+      plane.position.x = Math.cos(t * 0.16) * 0.01;
 
       // particles rise with scroll, drift with time
       points.rotation.y = t * 0.02;
@@ -226,7 +204,7 @@ export default function ScrollStage() {
         {reduced ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src="/images/hero-pizza.jpg"
+            src="/images/pizza-burrata.jpg"
             alt="Frisch gebackene Pizza im Fratelli d'Italia"
             className="absolute inset-0 h-full w-full object-cover opacity-70"
           />
@@ -238,10 +216,12 @@ export default function ScrollStage() {
           />
         )}
 
-        {/* vignette + scrim for text legibility */}
-        <div className="pointer-events-none absolute inset-0 bg-ink/35" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_15%,rgba(11,10,8,0.9)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink to-transparent" />
+        {/* Cinematic Scrim: linksseitige Abdunklung für Text-Kontrast,
+            weiche Vignette + tiefer Verlauf unten → edler, ruhiger Look */}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,7,6,0.88)_0%,rgba(8,7,6,0.55)_38%,rgba(8,7,6,0.15)_68%,transparent_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_8%,rgba(8,7,6,0.85)_115%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-ink to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink/70 to-transparent" />
 
         {/* ---- text state A: intro + conversion CTAs ---- */}
         <div
