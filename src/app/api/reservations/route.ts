@@ -1,10 +1,20 @@
 import { Resend } from "resend";
 import { SITE } from "@/data/site";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy init: erst zur Runtime, nicht beim Build
+let resendInstance: Resend | null = null;
+const getResend = () => {
+  if (!resendInstance) {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) throw new Error("RESEND_API_KEY not set — check Vercel Environment Variables");
+    resendInstance = new Resend(key);
+  }
+  return resendInstance;
+};
 
 export async function POST(req: Request) {
   try {
+    const resend = getResend();
     const body = await req.json();
     const { name, phone, dateNice, time, guests } = body;
 
