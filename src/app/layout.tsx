@@ -35,12 +35,54 @@ export const metadata: Metadata = {
   },
 };
 
+// Google-Trust: strukturierte Restaurant-Daten (Rich Results in der Suche)
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  name: "Fratelli d'Italia",
+  servesCuisine: "Italienisch",
+  priceRange: "€ 10–20",
+  telephone: "+43 2622 42220",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Friedrichsgasse 8",
+    postalCode: "2700",
+    addressLocality: "Wiener Neustadt",
+    addressCountry: "AT",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.8",
+    reviewCount: "512",
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Wednesday", "Thursday", "Friday", "Saturday"],
+      opens: "11:15",
+      closes: "14:15",
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Wednesday", "Thursday", "Friday", "Saturday"],
+      opens: "17:45",
+      closes: "22:30",
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="de" className={`${cormorant.variable} ${inter.variable}`}>
-      <body className="grain hungry-warm">{children}</body>
+      <body className="grain">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

@@ -6,12 +6,11 @@ import Logo from "./Logo";
 import { SITE } from "@/data/site";
 
 const LINKS = [
-  { href: "#geschichte", label: "Geschichte" },
-  { href: "#signature", label: "Signature" },
   { href: "#speisekarte", label: "Speisekarte" },
+  { href: "#geschichte", label: "Geschichte" },
   { href: "#atmosphaere", label: "Atmosphäre" },
   { href: "#rezensionen", label: "Stimmen" },
-  { href: "#standort", label: "Standort" },
+  { href: "#standort", label: "Standort & Zeiten" },
 ];
 
 export default function Navbar() {
@@ -56,9 +55,15 @@ export default function Navbar() {
         <div className="hidden items-center gap-3 lg:flex">
           <a
             href={`tel:${SITE.phoneIntl}`}
-            className="btn-gold rounded-full px-5 py-2 text-sm font-semibold"
+            className="text-sm font-semibold text-gold-light transition-colors hover:text-gold"
           >
-            {SITE.phone}
+            ☎ {SITE.phone}
+          </a>
+          <a
+            href="#reservieren"
+            className="btn-gold rounded-full px-5 py-2 text-sm font-bold"
+          >
+            Tisch reservieren
           </a>
         </div>
 
@@ -110,8 +115,17 @@ export default function Navbar() {
               ))}
               <li className="pt-3">
                 <a
+                  href="#reservieren"
+                  onClick={() => setOpen(false)}
+                  className="btn-gold block rounded-full px-5 py-3 text-center font-bold"
+                >
+                  Tisch reservieren
+                </a>
+              </li>
+              <li className="pt-2">
+                <a
                   href={`tel:${SITE.phoneIntl}`}
-                  className="btn-gold block rounded-full px-5 py-3 text-center font-semibold"
+                  className="btn-ghost block rounded-full px-5 py-3 text-center font-semibold"
                 >
                   Anrufen · {SITE.phone}
                 </a>

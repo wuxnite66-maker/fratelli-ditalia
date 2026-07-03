@@ -37,7 +37,7 @@ function answer(q: string): string {
     return `Piccante? La Diavolo! Scharfe Salami, Peperoni, Chili — die weckt die Lebensgeister. 🌶️`;
   }
   if (/(reservier|tisch|platz)/.test(s)) {
-    return `Rufen Sie uns einfach an: ${SITE.phone} — ich halte Ihnen einen schönen Tisch frei. Prometto!`;
+    return `Ganz einfach: Nutzen Sie das Reservierungsformular hier auf der Seite (Abschnitt „Tisch reservieren") — oder rufen Sie direkt an: ${SITE.phone}. Ich halte Ihnen einen schönen Tisch frei. Prometto!`;
   }
   if (/(wo|adresse|find|anfahrt|standort)/.test(s)) {
     return `Sie finden uns in der ${SITE.address}. Emotional gesehen: direkt in Italien. 🇮🇹`;

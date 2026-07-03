@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MENU, formatPrice } from "@/data/menu";
+import { SITE } from "@/data/site";
 import Reveal from "./Reveal";
 
 export default function MenuExperience() {
@@ -153,6 +154,31 @@ export default function MenuExperience() {
           <p className="mt-6 text-center text-xs text-cream-dim/60">
             Alle Preise in Euro, inkl. MwSt. Änderungen vorbehalten.
           </p>
+
+          {/* conversion bridge */}
+          <div className="mt-14 rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/10 via-gold/5 to-gold/10 p-8 text-center">
+            <p className="font-serif text-2xl italic text-cream md:text-3xl">
+              Gusto bekommen?
+            </p>
+            <p className="mt-2 text-sm text-cream-dim">
+              Sichern Sie sich Ihren Tisch — besonders Freitag &amp; Samstag
+              abends wird es voll.
+            </p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href="#reservieren"
+                className="btn-gold rounded-full px-8 py-3.5 text-sm font-bold uppercase tracking-widest"
+              >
+                Tisch reservieren
+              </a>
+              <a
+                href={`tel:${SITE.phoneIntl}`}
+                className="btn-ghost rounded-full px-8 py-3.5 text-sm font-semibold uppercase tracking-widest"
+              >
+                ☎ {SITE.phone}
+              </a>
+            </div>
+          </div>
         </Reveal>
       </div>
     </section>

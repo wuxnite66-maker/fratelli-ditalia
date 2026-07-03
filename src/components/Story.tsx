@@ -77,9 +77,9 @@ export default function Story() {
               </div>
               <div className="hidden h-12 w-px bg-gold/25 sm:block" />
               <div className="hidden sm:block">
-                <p className="font-serif text-4xl text-gold-light">∞</p>
+                <p className="font-serif text-4xl text-gold-light">€ 10–20</p>
                 <p className="mt-1 text-xs uppercase tracking-widest text-cream-dim">
-                  Amore
+                  Faire Preise
                 </p>
               </div>
             </div>

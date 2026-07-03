@@ -2,51 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { HOURS, SITE } from "@/data/site";
+import { useOpenStatus } from "@/lib/useOpenStatus";
 import Reveal from "./Reveal";
-
-function useOpenStatus() {
-  const [status, setStatus] = useState<{
-    open: boolean;
-    label: string;
-  } | null>(null);
-
-  useEffect(() => {
-    const check = () => {
-      const now = new Date();
-      const today = HOURS.find((h) => h.day === now.getDay());
-      const minutes = now.getHours() * 60 + now.getMinutes();
-      const toMin = (s: string) => {
-        const [h, m] = s.split(":").map(Number);
-        return h * 60 + m;
-      };
-      if (today?.slots) {
-        for (const slot of today.slots) {
-          if (minutes >= toMin(slot.open) && minutes < toMin(slot.close)) {
-            setStatus({
-              open: true,
-              label: `Jetzt geöffnet · bis ${slot.close} Uhr`,
-            });
-            return;
-          }
-        }
-        const next = today.slots.find((s) => minutes < toMin(s.open));
-        if (next) {
-          setStatus({
-            open: false,
-            label: `Geschlossen · öffnet heute um ${next.open} Uhr`,
-          });
-          return;
-        }
-      }
-      setStatus({ open: false, label: "Derzeit geschlossen" });
-    };
-    check();
-    const id = setInterval(check, 60_000);
-    return () => clearInterval(id);
-  }, []);
-
-  return status;
-}
 
 export default function LocationHours() {
   const status = useOpenStatus();
