@@ -20,7 +20,7 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--color-ink);
+  background: #0a0908;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -37,11 +37,27 @@ html {
 }
 
 body {
-  background: var(--color-ink);
+  background-color: #0a0908;
   color: var(--color-cream);
   font-family: var(--font-sans);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Eleganter Ambient-Hintergrund: tiefes warmes Anthrazit mit weichen,
+   asymmetrischen Kerzenlicht-Glows — als fixe Ebene hinter dem Inhalt
+   (eigener Compositing-Layer, kein Repaint beim Scrollen). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90rem 60rem at 80% -15%, rgba(232, 206, 147, 0.065), transparent 55%),
+    radial-gradient(70rem 50rem at -15% 25%, rgba(201, 169, 97, 0.05), transparent 55%),
+    radial-gradient(80rem 60rem at 110% 75%, rgba(194, 126, 62, 0.045), transparent 55%),
+    linear-gradient(180deg, #15130f 0%, #0e0c0a 45%, #0a0908 100%);
 }
 
 ::selection {
@@ -49,26 +65,16 @@ body {
   color: var(--color-ink);
 }
 
-/* ---------- film grain overlay ---------- */
+/* ---------- feines statisches Korn (Dithering gegen Banding) ---------- */
 .grain::before {
   content: "";
   position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
   pointer-events: none;
   z-index: 90;
-  opacity: 0.05;
+  opacity: 0.018;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain-shift 9s steps(10) infinite;
-}
-
-@keyframes grain-shift {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-3%, 2%); }
-  40% { transform: translate(2%, -3%); }
-  60% { transform: translate(-2%, -2%); }
-  80% { transform: translate(3%, 3%); }
+  background-size: 128px 128px;
 }
 
 /* ---------- glassmorphism ---------- */

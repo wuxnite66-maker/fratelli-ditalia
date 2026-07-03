@@ -6,16 +6,11 @@ import { HOURS, SITE } from "@/data/site";
 import Reveal from "./Reveal";
 
 /**
- * Reservierung ohne eigenes Backend:
- * Formular validiert gegen die echten Öffnungszeiten und schickt die
- * Anfrage per FormSubmit als E-Mail ans Restaurant-Postfach. Schlägt der
- * Versand fehl, bleibt der telefonische Weg als Fallback (ein Tap).
+ * Reservierung mit Next.js API-Route + Resend:
+ * Formular validiert gegen echte Öffnungszeiten, schickt per POST an
+ * /api/reservations, die Route versendet direkt per E-Mail via Resend.
+ * Keine Activation, kein Spam-Schutz, einfach weg.
  */
-
-// FormSubmit-Postfach: Anfragen landen hier als E-Mail.
-// Beim allerersten Versand schickt FormSubmit eine Aktivierungsmail an
-// diese Adresse — einmal bestätigen, danach läuft alles automatisch.
-const RESERVATION_INBOX = "wuxnite66@gmail.com";
 
 const toMin = (s: string) => {
   const [h, m] = s.split(":").map(Number);
@@ -75,26 +70,17 @@ export default function ReservationSection() {
   const submit = async () => {
     setSending(true);
     try {
-      const res = await fetch(
-        `https://formsubmit.co/ajax/${RESERVATION_INBOX}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            _subject: `🍕 Reservierung: ${dateNice}, ${time} Uhr — ${name.trim()}`,
-            _template: "table",
-            _captcha: "false",
-            Name: name.trim(),
-            Telefon: phone.trim(),
-            Datum: dateNice,
-            Uhrzeit: `${time} Uhr`,
-            Personen: guests === "9+" ? "Gruppe (mehr als 8)" : guests,
-          }),
-        }
-      );
+      const res = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          dateNice,
+          time,
+          guests,
+        }),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setSendError(false);
     } catch {
