@@ -51,7 +51,7 @@ export default function ScrollStage() {
 
     const loader = new THREE.TextureLoader();
     const texture: THREE.Texture = loader.load(
-      "/images/pizza-burrata.jpg",
+      "/images/restaurant-interior.jpg",
       (t) => {
         t.anisotropy = renderer.capabilities.getMaxAnisotropy();
         mediaAspect = t.image.width / t.image.height;
@@ -204,8 +204,8 @@ export default function ScrollStage() {
         {reduced ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src="/images/pizza-burrata.jpg"
-            alt="Frisch gebackene Pizza im Fratelli d'Italia"
+            src="/images/restaurant-interior.jpg"
+            alt="Das warme, elegante Interieur des Fratelli d'Italia"
             className="absolute inset-0 h-full w-full object-cover opacity-70"
           />
         ) : (
