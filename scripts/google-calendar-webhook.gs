@@ -43,10 +43,10 @@ function doPost(e) {
       "🍕 Reservierung: " + data.name + " (" + data.guests + " Pers.)";
     var description =
       "Gast: " + data.name +
-      "\nTelefon: " + data.phone +
+      "\nE-Mail: " + (data.email || data.phone || "") +
       "\nPersonen: " + data.guests +
       (data.notes ? "\nAnmerkungen: " + data.notes : "") +
-      "\n\nAngefragt über die Website — bitte telefonisch bestätigen.";
+      "\n\nAngefragt über die Website — bitte per E-Mail bestätigen.";
 
     CalendarApp.getDefaultCalendar().createEvent(title, start, end, {
       description: description,

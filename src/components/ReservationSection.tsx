@@ -45,19 +45,21 @@ export default function ReservationSection() {
   const [time, setTime] = useState("");
   const [guests, setGuests] = useState("2");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState(false);
+  const [customerNotified, setCustomerNotified] = useState(false);
 
   const slots = useMemo(() => slotsForDate(date), [date]);
   const closedDay = date !== "" && slots.length === 0;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const valid =
     date &&
     time &&
     name.trim().length >= 2 &&
-    phone.trim().length >= 6 &&
+    emailValid &&
     !closedDay;
 
   const dateNice = date
@@ -76,7 +78,7 @@ export default function ReservationSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          phone: phone.trim(),
+          email: email.trim(),
           date, // ISO (YYYY-MM-DD) — für Kalender-Eintrag
           dateNice,
           time,
@@ -85,6 +87,8 @@ export default function ReservationSection() {
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      setCustomerNotified(data?.customerNotified === true);
       setSendError(false);
     } catch {
       setSendError(true);
@@ -111,20 +115,20 @@ export default function ReservationSection() {
             Tisch <em className="gold-text">reservieren</em>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-cream-dim">
-            In 30 Sekunden angefragt — wir bestätigen telefonisch.
-            Kostenlos &amp; unverbindlich.
+            In 30 Sekunden angefragt — Sie erhalten sofort eine Bestätigung
+            per E-Mail. Kostenlos &amp; unverbindlich.
           </p>
         </Reveal>
 
         <Reveal delay={0.15}>
           <div className="glass-strong mt-12 rounded-2xl p-6 md:p-10">
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false}>
               {!done ? (
                 <motion.form
                   key="form"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, y: -16 }}
+                  exit={{ opacity: 0 }}
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (valid && !sending) submit();
@@ -228,22 +232,24 @@ export default function ReservationSection() {
 
                   <div>
                     <label
-                      htmlFor="res-phone"
+                      htmlFor="res-email"
                       className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gold-light"
                     >
-                      Telefon *
+                      E-Mail *
                     </label>
                     <input
-                      id="res-phone"
-                      type="tel"
+                      id="res-email"
+                      type="email"
                       required
-                      minLength={6}
-                      autoComplete="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="Für die Bestätigung"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="ihre@email.at"
                       className="min-h-12 w-full rounded-lg border border-gold/25 bg-ink px-4 text-cream placeholder:text-cream-dim/40 focus:border-gold/70 focus:outline-none"
                     />
+                    <p className="mt-1.5 text-xs text-cream-dim/60">
+                      Sie erhalten sofort eine Bestätigung per E-Mail.
+                    </p>
                   </div>
 
                   <div className="md:col-span-2">
@@ -291,7 +297,7 @@ export default function ReservationSection() {
                     </p>
                     <p className="text-cream-dim">
                       {guests === "9+" ? "Gruppe (9+)" : `${guests} ${guests === "1" ? "Person" : "Personen"}`}
-                      {" · "}☎ {phone.trim()}
+                      {" · "}✉ {email.trim()}
                     </p>
                   </div>
                   {!sendError ? (
@@ -300,8 +306,15 @@ export default function ReservationSection() {
                         <strong className="text-cream">
                           Vielen Dank für Ihre Reservierung!
                         </strong>{" "}
-                        Wir freuen uns auf Ihren Besuch. Bei Fragen erreichen
-                        Sie uns jederzeit telefonisch.
+                        {customerNotified ? (
+                          <>
+                            Eine Bestätigung mit allen Details ist unterwegs an{" "}
+                            <span className="text-gold-light">{email.trim()}</span>.
+                            Wir freuen uns auf Ihren Besuch.
+                          </>
+                        ) : (
+                          <>Wir freuen uns auf Ihren Besuch.</>
+                        )}
                       </p>
                       <a
                         href={`tel:${SITE.phoneIntl}`}
