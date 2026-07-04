@@ -271,10 +271,6 @@ export default function ReservationSection() {
                     >
                       {sending ? "Wird gesendet …" : "Reservierung anfragen"}
                     </button>
-                    <p className="mt-3 text-center text-xs text-cream-dim/60">
-                      Wir rufen Sie kurz zur Bestätigung an — dann ist Ihr
-                      Tisch fix.
-                    </p>
                   </div>
                 </motion.form>
               ) : (
