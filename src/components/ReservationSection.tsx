@@ -76,6 +76,7 @@ export default function ReservationSection() {
         body: JSON.stringify({
           name: name.trim(),
           phone: phone.trim(),
+          date, // ISO (YYYY-MM-DD) — für Kalender-Eintrag
           dateNice,
           time,
           guests,
