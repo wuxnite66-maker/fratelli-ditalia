@@ -107,7 +107,17 @@ export async function POST(req: Request) {
             durationHours: 2,
           }),
         });
-        calendarSynced = res.ok;
+        // Apps Script antwortet auch bei internen Fehlern mit HTTP 200 —
+        // daher den Body prüfen (erwartet { ok: true }).
+        if (res.ok) {
+          const text = await res.text();
+          try {
+            calendarSynced = JSON.parse(text)?.ok === true;
+          } catch {
+            // Kein JSON-Body → als Fehlschlag werten (Button als Fallback)
+            calendarSynced = false;
+          }
+        }
       } catch {
         calendarSynced = false;
       }
