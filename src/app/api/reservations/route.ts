@@ -35,7 +35,12 @@ type Reservation = {
   dateNice: string;
   time: string; // HH:MM
   guests: string;
+  notes?: string;
 };
+
+/** Anmerkungen als Zeile für Kalender-Beschreibungen (leer → weggelassen). */
+const notesLine = (r: Reservation, nl: string) =>
+  r.notes ? `${nl}Anmerkungen: ${r.notes}` : "";
 
 /** Ein-Klick-Link: Termin in Google Kalender übernehmen. */
 function googleCalendarLink(r: Reservation, start: string, end: string): string {
@@ -44,7 +49,7 @@ function googleCalendarLink(r: Reservation, start: string, end: string): string 
     text: `🍕 Reservierung: ${r.name} (${r.guests === "9+" ? "Gruppe 9+" : r.guests + " Pers."})`,
     dates: `${start}/${end}`,
     ctz: "Europe/Vienna",
-    details: `Gast: ${r.name}\nTelefon: ${r.phone}\nPersonen: ${r.guests}\n\nAngefragt über die Website — bitte telefonisch bestätigen.`,
+    details: `Gast: ${r.name}\nTelefon: ${r.phone}\nPersonen: ${r.guests}${notesLine(r, "\n")}\n\nAngefragt über die Website — bitte telefonisch bestätigen.`,
     location: `Fratelli d'Italia, ${SITE.address}`,
   });
   return `https://calendar.google.com/calendar/render?${params}`;
@@ -67,7 +72,7 @@ function buildIcs(r: Reservation, start: string, end: string): string {
     `DTSTART;TZID=Europe/Vienna:${start}`,
     `DTEND;TZID=Europe/Vienna:${end}`,
     `SUMMARY:🍕 Reservierung: ${r.name} (${r.guests} Pers.)`,
-    `DESCRIPTION:Gast: ${r.name}\\nTelefon: ${r.phone}\\nPersonen: ${r.guests}\\n\\nAngefragt über die Website — bitte telefonisch bestätigen.`,
+    `DESCRIPTION:Gast: ${r.name}\\nTelefon: ${r.phone}\\nPersonen: ${r.guests}${notesLine(r, "\\n")}\\n\\nAngefragt über die Website — bitte telefonisch bestätigen.`,
     `LOCATION:Fratelli d'Italia\\, ${SITE.address}`,
     "END:VEVENT",
     "END:VCALENDAR",
@@ -77,14 +82,22 @@ function buildIcs(r: Reservation, start: string, end: string): string {
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as Partial<Reservation>;
-    const { name, phone, date, dateNice, time, guests } = body;
+    const { name, phone, date, dateNice, time, guests, notes } = body;
 
     if (!name || !phone || !dateNice || !time || !guests) {
       return Response.json({ error: "Fehlende Felder" }, { status: 400 });
     }
 
     // Kalenderdaten (Reservierung wird mit 2 Stunden geblockt)
-    const r: Reservation = { name, phone, date: date ?? "", dateNice, time, guests };
+    const r: Reservation = {
+      name,
+      phone,
+      date: date ?? "",
+      dateNice,
+      time,
+      guests,
+      notes: notes?.trim() || undefined,
+    };
     const hasDate = /^\d{4}-\d{2}-\d{2}$/.test(r.date);
     const start = hasDate ? calStamp(r.date, time) : "";
     const end = hasDate ? calStamp(r.date, time, 2) : "";
@@ -104,6 +117,7 @@ export async function POST(req: Request) {
             date: r.date,
             time: r.time,
             guests: r.guests,
+            notes: r.notes ?? "",
             durationHours: 2,
           }),
         });
@@ -144,6 +158,7 @@ export async function POST(req: Request) {
         <p><strong>Datum:</strong> ${dateNice}</p>
         <p><strong>Uhrzeit:</strong> ${time} Uhr</p>
         <p><strong>Personen:</strong> ${guests === "9+" ? "Gruppe (mehr als 8)" : guests}</p>
+        ${r.notes ? `<p><strong>Anmerkungen:</strong> ${r.notes}</p>` : ""}
         ${syncedNote}
         ${calButton}
         <hr />

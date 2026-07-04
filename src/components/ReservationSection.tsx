@@ -46,6 +46,7 @@ export default function ReservationSection() {
   const [guests, setGuests] = useState("2");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
   const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState(false);
@@ -80,6 +81,7 @@ export default function ReservationSection() {
           dateNice,
           time,
           guests,
+          notes: notes.trim(),
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -245,6 +247,23 @@ export default function ReservationSection() {
                   </div>
 
                   <div className="md:col-span-2">
+                    <label
+                      htmlFor="res-notes"
+                      className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gold-light"
+                    >
+                      Anmerkungen <span className="text-cream-dim/50">(optional)</span>
+                    </label>
+                    <textarea
+                      id="res-notes"
+                      rows={3}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="z. B. Allergien, Kinderstuhl, Tisch am Fenster, besonderer Anlass …"
+                      className="w-full resize-none rounded-lg border border-gold/25 bg-ink px-4 py-3 text-cream placeholder:text-cream-dim/40 focus:border-gold/70 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
                     <button
                       type="submit"
                       disabled={!valid || sending}
@@ -282,10 +301,11 @@ export default function ReservationSection() {
                   {!sendError ? (
                     <>
                       <p className="mx-auto mt-6 max-w-sm text-cream-dim">
-                        Ihre Anfrage ist{" "}
-                        <strong className="text-cream">angekommen</strong> —
-                        wir rufen Sie kurz zur Bestätigung an. Sie wollen
-                        sofort Gewissheit?
+                        <strong className="text-cream">
+                          Vielen Dank für Ihre Reservierung!
+                        </strong>{" "}
+                        Wir freuen uns auf Ihren Besuch. Bei Fragen erreichen
+                        Sie uns jederzeit telefonisch.
                       </p>
                       <a
                         href={`tel:${SITE.phoneIntl}`}

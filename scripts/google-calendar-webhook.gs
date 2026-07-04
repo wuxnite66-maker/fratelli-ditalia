@@ -45,6 +45,7 @@ function doPost(e) {
       "Gast: " + data.name +
       "\nTelefon: " + data.phone +
       "\nPersonen: " + data.guests +
+      (data.notes ? "\nAnmerkungen: " + data.notes : "") +
       "\n\nAngefragt über die Website — bitte telefonisch bestätigen.";
 
     CalendarApp.getDefaultCalendar().createEvent(title, start, end, {
